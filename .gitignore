@@ -1,0 +1,9 @@
+# Build output
+build/
+build-*/
+
+# Editor / OS
+.DS_Store
+.vscode/
+.idea/
+compile_commands.json
