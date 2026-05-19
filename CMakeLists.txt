@@ -14,3 +14,25 @@ add_library(retina_core INTERFACE)
 target_include_directories(retina_core INTERFACE ${CMAKE_SOURCE_DIR}/include)
 
 # Targets (apps, tests) get added here as we build them.
+
+# --- tests ---
+enable_testing()
+
+# ThreadSanitizer for the concurrency tests. Off by default (it slows things and
+# needs its own build dir); flip on with -DRETINA_TSAN=ON.
+option(RETINA_TSAN "Build tests with ThreadSanitizer" OFF)
+
+add_executable(test_latest_value tests/test_latest_value.cpp)
+target_link_libraries(test_latest_value PRIVATE retina_core)
+add_test(NAME latest_value COMMAND test_latest_value)
+
+add_executable(test_latest_value_mt tests/test_latest_value_mt.cpp)
+target_link_libraries(test_latest_value_mt PRIVATE retina_core)
+find_package(Threads REQUIRED)
+target_link_libraries(test_latest_value_mt PRIVATE Threads::Threads)
+add_test(NAME latest_value_mt COMMAND test_latest_value_mt)
+
+if(RETINA_TSAN)
+    target_compile_options(test_latest_value_mt PRIVATE -fsanitize=thread -g -O1)
+    target_link_options(test_latest_value_mt PRIVATE -fsanitize=thread)
+endif()
