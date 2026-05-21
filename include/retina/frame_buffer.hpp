@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <stdexcept>
 
 #include "retina/frame.hpp"
 
@@ -56,7 +57,26 @@ public:
     virtual void publish(const Frame& frame) = 0;  // never blocks; drops stale on full
 
     // --- consumer side ---
-    virtual FrameHandle latest() = 0;              // newest frame, or an empty handle if none
+    // Two disciplines, two verbs. A buffer implements the ONE that matches its
+    // drop policy; the other keeps the base's throwing default. This is why the
+    // trait is the right seam for the M1 latency-vs-completeness comparison:
+    // the SAME consumer code path, a different verb, a measurably different
+    // tradeoff. Calling the unsupported verb is a programming error (wrong
+    // buffer for the job), so it throws rather than returning an empty handle —
+    // empty already means "supported, but no frame yet".
+
+    // FRESHNESS: the newest frame, stale ones dropped. Empty handle if none yet.
+    // Implemented by LatestValue / DoubleBuf / TripleBuf.
+    virtual FrameHandle latest() {
+        throw std::logic_error("FrameBuffer: latest() not supported by this implementation");
+    }
+
+    // COMPLETENESS: the oldest frame not yet consumed, FIFO, no skipping. Empty
+    // handle if the consumer has drained everything published so far.
+    // Implemented by SpscRing.
+    virtual FrameHandle next() {
+        throw std::logic_error("FrameBuffer: next() not supported by this implementation");
+    }
 
 protected:
     // Called by FrameHandle's destructor, NOT by consumers directly. Drops the
