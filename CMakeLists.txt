@@ -36,6 +36,10 @@ add_executable(test_latest_value_alloc tests/test_latest_value_alloc.cpp)
 target_link_libraries(test_latest_value_alloc PRIVATE retina_core)
 add_test(NAME latest_value_alloc COMMAND test_latest_value_alloc)
 
+add_executable(test_spsc_ring tests/test_spsc_ring.cpp)
+target_link_libraries(test_spsc_ring PRIVATE retina_core)
+add_test(NAME spsc_ring COMMAND test_spsc_ring)
+
 if(RETINA_TSAN)
     target_compile_options(test_latest_value_mt PRIVATE -fsanitize=thread -g -O1)
     target_link_options(test_latest_value_mt PRIVATE -fsanitize=thread)
