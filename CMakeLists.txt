@@ -44,9 +44,19 @@ add_executable(test_spsc_ring_mt tests/test_spsc_ring_mt.cpp)
 target_link_libraries(test_spsc_ring_mt PRIVATE retina_core Threads::Threads)
 add_test(NAME spsc_ring_mt COMMAND test_spsc_ring_mt)
 
+add_executable(test_double_triple tests/test_double_triple.cpp)
+target_link_libraries(test_double_triple PRIVATE retina_core)
+add_test(NAME double_triple COMMAND test_double_triple)
+
+add_executable(test_double_triple_mt tests/test_double_triple_mt.cpp)
+target_link_libraries(test_double_triple_mt PRIVATE retina_core Threads::Threads)
+add_test(NAME double_triple_mt COMMAND test_double_triple_mt)
+
 if(RETINA_TSAN)
-    target_compile_options(test_spsc_ring_mt PRIVATE -fsanitize=thread -g -O1)
-    target_link_options(test_spsc_ring_mt PRIVATE -fsanitize=thread)
+    target_compile_options(test_spsc_ring_mt      PRIVATE -fsanitize=thread -g -O1)
+    target_link_options(test_spsc_ring_mt         PRIVATE -fsanitize=thread)
+    target_compile_options(test_double_triple_mt  PRIVATE -fsanitize=thread -g -O1)
+    target_link_options(test_double_triple_mt     PRIVATE -fsanitize=thread)
 endif()
 
 if(RETINA_TSAN)
