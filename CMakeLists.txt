@@ -48,6 +48,10 @@ add_executable(test_double_triple tests/test_double_triple.cpp)
 target_link_libraries(test_double_triple PRIVATE retina_core)
 add_test(NAME double_triple COMMAND test_double_triple)
 
+add_executable(test_camsim tests/test_camsim.cpp)
+target_link_libraries(test_camsim PRIVATE retina_core)
+add_test(NAME camsim COMMAND test_camsim)
+
 add_executable(test_double_triple_mt tests/test_double_triple_mt.cpp)
 target_link_libraries(test_double_triple_mt PRIVATE retina_core Threads::Threads)
 add_test(NAME double_triple_mt COMMAND test_double_triple_mt)
