@@ -26,14 +26,16 @@
 #include <vector>
 
 #include "retina/latest_value.hpp"
+#include "mt_env.hpp"
 
 using namespace retina;
 
 namespace {
 
-constexpr unsigned    kConsumers   = 4;
-constexpr uint64_t    kFrameCount  = 200'000;   // frames the producer publishes
-constexpr std::size_t kFrameBytes  = 32 * 1024; // big enough to widen the race window
+// Defaults are heavy (wide race window); override via env for CI. See mt_env.hpp.
+const unsigned    kConsumers  = static_cast<unsigned>(retina_test::env_u64("RETINA_MT_CONSUMERS", 4));
+const uint64_t    kFrameCount = retina_test::env_u64("RETINA_MT_FRAMES", 200'000);
+const std::size_t kFrameBytes = static_cast<std::size_t>(retina_test::env_u64("RETINA_MT_BYTES", 32 * 1024));
 
 std::atomic<bool>     g_producer_done{false};
 std::atomic<uint64_t> g_valid_reads{0};   // handles that were valid

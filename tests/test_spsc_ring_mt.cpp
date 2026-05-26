@@ -25,14 +25,16 @@
 #include <vector>
 
 #include "retina/spsc_ring.hpp"
+#include "mt_env.hpp"
 
 using namespace retina;
 
 namespace {
 
-constexpr std::size_t kCapacity    = 8;
-constexpr uint64_t    kFrameCount  = 200'000;
-constexpr std::size_t kFrameBytes  = 4096;
+// Defaults are heavy (wide race window); override via env for CI. See mt_env.hpp.
+const std::size_t kCapacity   = static_cast<std::size_t>(retina_test::env_u64("RETINA_MT_CAPACITY", 8));
+const uint64_t    kFrameCount = retina_test::env_u64("RETINA_MT_FRAMES", 200'000);
+const std::size_t kFrameBytes = static_cast<std::size_t>(retina_test::env_u64("RETINA_MT_BYTES", 4096));
 
 std::atomic<bool>     g_producer_done{false};
 std::atomic<uint64_t> g_received{0};      // frames the consumer got

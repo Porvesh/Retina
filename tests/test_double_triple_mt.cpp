@@ -20,13 +20,15 @@
 
 #include "retina/double_buffer.hpp"
 #include "retina/triple_buffer.hpp"
+#include "mt_env.hpp"
 
 using namespace retina;
 
 namespace {
 
-constexpr uint64_t    kFrameCount = 200'000;
-constexpr std::size_t kFrameBytes = 4096;
+// Defaults are heavy (wide race window); override via env for CI. See mt_env.hpp.
+const uint64_t    kFrameCount = retina_test::env_u64("RETINA_MT_FRAMES", 200'000);
+const std::size_t kFrameBytes = static_cast<std::size_t>(retina_test::env_u64("RETINA_MT_BYTES", 4096));
 
 bool frame_is_consistent(const Frame& f) {
     const uint8_t expect = static_cast<uint8_t>(f.seq & 0xFF);
