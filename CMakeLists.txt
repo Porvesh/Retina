@@ -62,6 +62,10 @@ add_executable(test_stream_aligner tests/test_stream_aligner.cpp)
 target_link_libraries(test_stream_aligner PRIVATE retina_core)
 add_test(NAME stream_aligner COMMAND test_stream_aligner)
 
+add_executable(test_encoder tests/test_encoder.cpp)
+target_link_libraries(test_encoder PRIVATE retina_core)
+add_test(NAME encoder COMMAND test_encoder)
+
 add_executable(test_double_triple_mt tests/test_double_triple_mt.cpp)
 target_link_libraries(test_double_triple_mt PRIVATE retina_core Threads::Threads)
 add_test(NAME double_triple_mt COMMAND test_double_triple_mt)
