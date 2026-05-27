@@ -66,6 +66,10 @@ add_executable(test_encoder tests/test_encoder.cpp)
 target_link_libraries(test_encoder PRIVATE retina_core)
 add_test(NAME encoder COMMAND test_encoder)
 
+add_executable(test_packet tests/test_packet.cpp)
+target_link_libraries(test_packet PRIVATE retina_core)
+add_test(NAME packet COMMAND test_packet)
+
 add_executable(test_double_triple_mt tests/test_double_triple_mt.cpp)
 target_link_libraries(test_double_triple_mt PRIVATE retina_core Threads::Threads)
 add_test(NAME double_triple_mt COMMAND test_double_triple_mt)
