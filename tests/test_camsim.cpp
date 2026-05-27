@@ -97,6 +97,70 @@ static void test_different_seed_differs() {
     CHECK(fa.data[0] != fb.data[0]);   // base differs by the seed delta
 }
 
+// ─── fault injection ─────────────────────────────────────────────────────────
+
+// No faults → no drops, contiguous seqs (the default, made explicit).
+static void test_no_faults_no_drops() {
+    CamSim cam(8, 8, PixelFormat::GRAY8);
+    uint64_t last = 0;
+    for (int n = 0; n < 100; ++n) {
+        Frame f = cam.next();
+        CHECK(f.seq == last + 1);   // strictly contiguous
+        last = f.seq;
+    }
+    CHECK(cam.frames_dropped() == 0);
+    CHECK(cam.frames_emitted() == 100);
+}
+
+// A drop rate produces seq GAPS: emitted frames stay strictly increasing, some
+// frame numbers are skipped, and the accounting adds up (dropped + emitted ==
+// the last tick number).
+static void test_drop_rate_makes_gaps() {
+    CamSim cam(8, 8, PixelFormat::GRAY8, /*seed=*/42, /*fps=*/30, {/*drop=*/0.5, /*jitter=*/0});
+    uint64_t last = 0, gaps = 0;
+    for (int n = 0; n < 200; ++n) {
+        Frame f = cam.next();
+        CHECK(f.seq > last);             // never repeats or goes backwards
+        if (f.seq > last + 1) ++gaps;    // a skipped frame number = a capture drop
+        last = f.seq;
+    }
+    CHECK(cam.frames_emitted() == 200);
+    CHECK(cam.frames_dropped() > 0);          // ~half the ticks dropped
+    CHECK(gaps > 0);                          // gaps are actually visible
+    CHECK(cam.frames_dropped() + cam.frames_emitted() == last);  // accounting closes
+}
+
+// Same seed + same faults → byte-for-byte identical stream (seqs and timestamps).
+static void test_faults_are_deterministic() {
+    const CamSim::Faults faults{0.3, 5000};
+    CamSim a(8, 8, PixelFormat::GRAY8, /*seed=*/7, /*fps=*/30, faults);
+    CamSim b(8, 8, PixelFormat::GRAY8, /*seed=*/7, /*fps=*/30, faults);
+    for (int n = 0; n < 100; ++n) {
+        Frame fa = a.next();
+        Frame fb = b.next();
+        CHECK(fa.seq == fb.seq);
+        CHECK(fa.capture_ts == fb.capture_ts);   // jitter is deterministic too
+    }
+    CHECK(a.frames_dropped() == b.frames_dropped());
+}
+
+// Jitter stays within [0, max]: each frame's timestamp is its scheduled tick
+// time plus an offset no larger than the configured bound.
+static void test_jitter_is_bounded() {
+    const uint64_t dt = 1'000'000'000ull / 30;
+    const uint64_t max_jitter = 3000;
+    CamSim cam(8, 8, PixelFormat::GRAY8, /*seed=*/1, /*fps=*/30, {/*drop=*/0.0, max_jitter});
+    bool any_jitter = false;
+    for (int n = 0; n < 100; ++n) {
+        Frame f = cam.next();
+        const uint64_t scheduled = f.seq * dt;   // no drops, so seq == tick
+        CHECK(f.capture_ts >= scheduled);
+        CHECK(f.capture_ts <= scheduled + max_jitter);
+        if (f.capture_ts != scheduled) any_jitter = true;
+    }
+    CHECK(any_jitter);   // jitter actually happens
+}
+
 int main() {
     struct { const char* name; void (*fn)(); } cases[] = {
         {"seq_and_timestamps",     test_seq_and_timestamps},
@@ -105,6 +169,10 @@ int main() {
         {"content_shape",          test_content_shape},
         {"same_seed_identical",    test_same_seed_identical},
         {"different_seed_differs", test_different_seed_differs},
+        {"no_faults_no_drops",     test_no_faults_no_drops},
+        {"drop_rate_makes_gaps",   test_drop_rate_makes_gaps},
+        {"faults_are_deterministic", test_faults_are_deterministic},
+        {"jitter_is_bounded",      test_jitter_is_bounded},
     };
 
     for (auto& c : cases) {
