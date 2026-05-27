@@ -15,6 +15,12 @@ target_include_directories(retina_core INTERFACE ${CMAKE_SOURCE_DIR}/include)
 
 # Targets (apps, tests) get added here as we build them.
 
+# --- apps (runnable demos) ---
+find_package(Threads REQUIRED)
+
+add_executable(m0_spine apps/m0_spine.cpp)
+target_link_libraries(m0_spine PRIVATE retina_core Threads::Threads)
+
 # --- tests ---
 enable_testing()
 
