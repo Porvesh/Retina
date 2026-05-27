@@ -19,7 +19,7 @@ namespace retina {
 // no allocation (the buffer is sized once in the ctor), matching the project's
 // RT-safe discipline.
 //
-// Fault injection (both off by default):
+// Fault injection (all off by default):
 //   - drop_rate: fraction of capture ticks dropped AT CAPTURE. A dropped tick
 //     still consumes its frame number, so emitted frames show a seq GAP —
 //     exactly how a downstream consumer detects capture loss. (This is what
@@ -27,9 +27,15 @@ namespace retina {
 //   - max_jitter_ns: capture_ts gets a bounded random offset, modelling
 //     delivery jitter. Keep it below the frame interval to keep timestamps
 //     monotonic.
+//   - drift_ppm: the camera's own clock runs fast/slow vs "truth" by this many
+//     parts-per-million (signed). Its capture_ts is scaled by (1 + ppm/1e6), so
+//     two cams with different drift report DIFFERENT timestamps for the same
+//     real instant, and the gap grows over time. This is what makes M2's
+//     multi-stream alignment non-trivial — with zero drift every stream lines
+//     up exactly and there's nothing to align.
 //
-// Timestamps are SIMULATED (tick * frame interval, + jitter), never read from a
-// clock, so output depends only on the seed, not on wall-clock timing.
+// Timestamps are SIMULATED (drifted tick * frame interval, + jitter), never
+// read from a clock, so output depends only on the seed, not on wall time.
 //
 // Note: this next() is a frame SOURCE and is unrelated to FrameBuffer::next()
 // (the ring's FIFO consumer verb) — different type, different job.
@@ -38,6 +44,7 @@ public:
     struct Faults {
         double   drop_rate     = 0.0;   // P(a given tick is dropped at capture), [0,1)
         uint64_t max_jitter_ns = 0;     // capture_ts += random offset in [0, max_jitter_ns]
+        double   drift_ppm     = 0.0;   // clock drift vs truth, parts-per-million (signed)
     };
 
     // Full constructor (with faults).
@@ -71,8 +78,13 @@ public:
         }
         ++emitted_;
 
-        // Scheduled exposure time for this tick, plus optional bounded jitter.
-        uint64_t ts = tick_ * frame_interval_ns_;
+        // Scheduled exposure time for this tick. The camera's own clock drifts
+        // vs truth, so scale the true time by (1 + ppm/1e6) before adding the
+        // bounded jitter noise on top.
+        double   true_ns = static_cast<double>(tick_) *
+                           static_cast<double>(frame_interval_ns_);
+        uint64_t ts      = static_cast<uint64_t>(
+                               true_ns * (1.0 + faults_.drift_ppm / 1e6));
         if (faults_.max_jitter_ns > 0)
             ts += static_cast<uint64_t>(next_unit() *
                                         static_cast<double>(faults_.max_jitter_ns + 1));

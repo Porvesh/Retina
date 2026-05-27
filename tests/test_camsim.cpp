@@ -161,6 +161,45 @@ static void test_jitter_is_bounded() {
     CHECK(any_jitter);   // jitter actually happens
 }
 
+// Positive drift makes the camera's clock run AHEAD of the true schedule, and
+// the lead grows over time (proportional to elapsed time, i.e. to seq).
+static void test_drift_scales_timestamps() {
+    const uint64_t dt  = 1'000'000'000ull / 30;
+    const double   ppm = 1000.0;   // +1000 ppm = 0.1% fast
+    CamSim cam(8, 8, PixelFormat::GRAY8, /*seed=*/1, /*fps=*/30,
+               {/*drop=*/0.0, /*jitter=*/0, ppm});
+
+    uint64_t prev_lead = 0;
+    for (int n = 1; n <= 100; ++n) {
+        Frame f = cam.next();                 // no drops → seq == tick == n
+        const uint64_t truth = f.seq * dt;
+        CHECK(f.capture_ts >= truth);          // running fast → ahead of truth
+        const uint64_t lead = f.capture_ts - truth;
+        CHECK(lead >= prev_lead);              // and the lead never shrinks
+        prev_lead = lead;
+    }
+    CHECK(prev_lead > 0);                      // drift actually moved the clock
+}
+
+// Two cams with different drift diverge, and the gap grows with time — this is
+// exactly the desync M2's aligner has to cope with.
+static void test_relative_drift_diverges() {
+    CamSim slow(8, 8, PixelFormat::GRAY8, /*seed=*/1, /*fps=*/30,
+                {0.0, 0, /*drift=*/-500.0});   // 500 ppm slow
+    CamSim fast(8, 8, PixelFormat::GRAY8, /*seed=*/1, /*fps=*/30,
+                {0.0, 0, /*drift=*/+500.0});   // 500 ppm fast
+
+    uint64_t gap_early = 0, gap_late = 0;
+    for (int n = 1; n <= 200; ++n) {
+        Frame a = slow.next();
+        Frame b = fast.next();
+        const uint64_t gap = b.capture_ts - a.capture_ts;  // fast leads slow
+        if (n == 10)  gap_early = gap;
+        if (n == 200) gap_late  = gap;
+    }
+    CHECK(gap_late > gap_early);   // divergence accumulates over time
+}
+
 int main() {
     struct { const char* name; void (*fn)(); } cases[] = {
         {"seq_and_timestamps",     test_seq_and_timestamps},
@@ -173,6 +212,8 @@ int main() {
         {"drop_rate_makes_gaps",   test_drop_rate_makes_gaps},
         {"faults_are_deterministic", test_faults_are_deterministic},
         {"jitter_is_bounded",      test_jitter_is_bounded},
+        {"drift_scales_timestamps", test_drift_scales_timestamps},
+        {"relative_drift_diverges", test_relative_drift_diverges},
     };
 
     for (auto& c : cases) {
