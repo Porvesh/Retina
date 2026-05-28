@@ -74,6 +74,10 @@ add_executable(test_channel tests/test_channel.cpp)
 target_link_libraries(test_channel PRIVATE retina_core)
 add_test(NAME channel COMMAND test_channel)
 
+add_executable(test_decoder tests/test_decoder.cpp)
+target_link_libraries(test_decoder PRIVATE retina_core)
+add_test(NAME decoder COMMAND test_decoder)
+
 add_executable(test_double_triple_mt tests/test_double_triple_mt.cpp)
 target_link_libraries(test_double_triple_mt PRIVATE retina_core Threads::Threads)
 add_test(NAME double_triple_mt COMMAND test_double_triple_mt)
