@@ -78,6 +78,10 @@ add_executable(test_decoder tests/test_decoder.cpp)
 target_link_libraries(test_decoder PRIVATE retina_core)
 add_test(NAME decoder COMMAND test_decoder)
 
+add_executable(test_jitter_buffer tests/test_jitter_buffer.cpp)
+target_link_libraries(test_jitter_buffer PRIVATE retina_core)
+add_test(NAME jitter_buffer COMMAND test_jitter_buffer)
+
 add_executable(test_double_triple_mt tests/test_double_triple_mt.cpp)
 target_link_libraries(test_double_triple_mt PRIVATE retina_core Threads::Threads)
 add_test(NAME double_triple_mt COMMAND test_double_triple_mt)
