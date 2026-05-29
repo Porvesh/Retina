@@ -33,6 +33,13 @@ struct Packet {
     uint64_t             capture_ts = 0;
     uint64_t             depends_on = 0;
     std::vector<uint8_t> payload;          // this fragment's slice of the bytes
+
+    // FEC routing (see fec.hpp). Data packets carry the group they belong to;
+    // a parity packet has is_parity=true and fec_k = #data packets it protects.
+    // The reassembler and jitter buffer ignore these fields.
+    bool                 is_parity  = false;
+    uint64_t             fec_group  = 0;
+    uint32_t             fec_k      = 0;
 };
 
 // Splits EncodedFrames into MTU-sized packets, numbering every packet with a
