@@ -86,6 +86,10 @@ add_executable(test_fec tests/test_fec.cpp)
 target_link_libraries(test_fec PRIVATE retina_core)
 add_test(NAME fec COMMAND test_fec)
 
+add_executable(test_feedback tests/test_feedback.cpp)
+target_link_libraries(test_feedback PRIVATE retina_core)
+add_test(NAME feedback COMMAND test_feedback)
+
 add_executable(test_double_triple_mt tests/test_double_triple_mt.cpp)
 target_link_libraries(test_double_triple_mt PRIVATE retina_core Threads::Threads)
 add_test(NAME double_triple_mt COMMAND test_double_triple_mt)
