@@ -21,6 +21,9 @@ find_package(Threads REQUIRED)
 add_executable(m0_spine apps/m0_spine.cpp)
 target_link_libraries(m0_spine PRIVATE retina_core Threads::Threads)
 
+add_executable(m3_link apps/m3_link.cpp)
+target_link_libraries(m3_link PRIVATE retina_core)
+
 # --- tests ---
 enable_testing()
 
