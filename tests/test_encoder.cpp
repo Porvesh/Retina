@@ -8,8 +8,8 @@
 #include <cstdio>
 #include <vector>
 
-#include "retina/camsim.hpp"
-#include "retina/encoder.hpp"
+#include "retina/sim/camsim.hpp"
+#include "retina/net/encoder.hpp"
 
 using namespace retina;
 

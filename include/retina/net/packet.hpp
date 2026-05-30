@@ -6,7 +6,7 @@
 #include <optional>
 #include <vector>
 
-#include "retina/encoded_frame.hpp"
+#include "retina/net/encoded_frame.hpp"
 
 namespace retina {
 

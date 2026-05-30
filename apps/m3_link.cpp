@@ -15,14 +15,14 @@
 #include <cstdio>
 #include <vector>
 
-#include "retina/camsim.hpp"
-#include "retina/channel.hpp"
-#include "retina/decoder.hpp"
-#include "retina/encoder.hpp"
-#include "retina/fec.hpp"
-#include "retina/feedback.hpp"
-#include "retina/jitter_buffer.hpp"
-#include "retina/packet.hpp"
+#include "retina/sim/camsim.hpp"
+#include "retina/net/channel.hpp"
+#include "retina/net/decoder.hpp"
+#include "retina/net/encoder.hpp"
+#include "retina/net/fec.hpp"
+#include "retina/net/feedback.hpp"
+#include "retina/net/jitter_buffer.hpp"
+#include "retina/net/packet.hpp"
 
 using namespace retina;
 

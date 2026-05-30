@@ -10,9 +10,9 @@
 #include <optional>
 #include <vector>
 
-#include "retina/decoder.hpp"
-#include "retina/encoder.hpp"
-#include "retina/packet.hpp"
+#include "retina/net/decoder.hpp"
+#include "retina/net/encoder.hpp"
+#include "retina/net/packet.hpp"
 
 using namespace retina;
 

@@ -16,8 +16,8 @@
 #include <cstdio>
 #include <thread>
 
-#include "retina/camsim.hpp"
-#include "retina/latest_value.hpp"
+#include "retina/sim/camsim.hpp"
+#include "retina/buffers/latest_value.hpp"
 
 using namespace retina;
 using Clock = std::chrono::steady_clock;

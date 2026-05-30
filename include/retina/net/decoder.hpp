@@ -2,7 +2,7 @@
 #include <cstdint>
 #include <unordered_set>
 
-#include "retina/encoded_frame.hpp"
+#include "retina/net/encoded_frame.hpp"
 
 namespace retina {
 

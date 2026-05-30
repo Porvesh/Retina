@@ -8,8 +8,8 @@
 #include <cstdio>
 #include <vector>
 
-#include "retina/channel.hpp"
-#include "retina/jitter_buffer.hpp"
+#include "retina/net/channel.hpp"
+#include "retina/net/jitter_buffer.hpp"
 
 using namespace retina;
 

@@ -9,7 +9,7 @@
 #include <stdexcept>
 #include <vector>
 
-#include "retina/spsc_ring.hpp"
+#include "retina/buffers/spsc_ring.hpp"
 
 using namespace retina;
 

@@ -2,7 +2,7 @@
 #include <cstdint>
 #include <stdexcept>
 
-#include "retina/frame.hpp"
+#include "retina/core/frame.hpp"
 
 namespace retina {
 

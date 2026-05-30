@@ -8,8 +8,8 @@
 #include <optional>
 #include <vector>
 
-#include "retina/encoder.hpp"
-#include "retina/packet.hpp"
+#include "retina/net/encoder.hpp"
+#include "retina/net/packet.hpp"
 
 using namespace retina;
 

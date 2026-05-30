@@ -6,8 +6,8 @@
 #include <cstring>
 #include <vector>
 
-#include "retina/frame.hpp"
-#include "retina/frame_buffer.hpp"
+#include "retina/core/frame.hpp"
+#include "retina/core/frame_buffer.hpp"
 
 namespace retina {
 

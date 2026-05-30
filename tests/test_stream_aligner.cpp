@@ -8,8 +8,8 @@
 #include <cstdio>
 #include <optional>
 
-#include "retina/camsim.hpp"
-#include "retina/stream_aligner.hpp"
+#include "retina/sim/camsim.hpp"
+#include "retina/align/stream_aligner.hpp"
 
 using namespace retina;
 

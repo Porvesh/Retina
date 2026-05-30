@@ -8,9 +8,9 @@
 #include <cstdio>
 #include <vector>
 
-#include "retina/encoder.hpp"
-#include "retina/fec.hpp"
-#include "retina/packet.hpp"
+#include "retina/net/encoder.hpp"
+#include "retina/net/fec.hpp"
+#include "retina/net/packet.hpp"
 
 using namespace retina;
 

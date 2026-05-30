@@ -5,7 +5,7 @@
 #include <random>
 #include <vector>
 
-#include "retina/packet.hpp"
+#include "retina/net/packet.hpp"
 
 namespace retina {
 

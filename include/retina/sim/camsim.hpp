@@ -4,7 +4,7 @@
 #include <random>
 #include <vector>
 
-#include "retina/frame.hpp"
+#include "retina/core/frame.hpp"
 
 namespace retina {
 

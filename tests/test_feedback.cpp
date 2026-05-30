@@ -6,9 +6,9 @@
 #include <cstdio>
 #include <vector>
 
-#include "retina/decoder.hpp"
-#include "retina/encoder.hpp"
-#include "retina/feedback.hpp"
+#include "retina/net/decoder.hpp"
+#include "retina/net/encoder.hpp"
+#include "retina/net/feedback.hpp"
 
 using namespace retina;
 

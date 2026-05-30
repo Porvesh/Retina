@@ -3,8 +3,8 @@
 #include <cstdint>
 #include <vector>
 
-#include "retina/encoded_frame.hpp"
-#include "retina/frame.hpp"
+#include "retina/net/encoded_frame.hpp"
+#include "retina/core/frame.hpp"
 
 namespace retina {
 

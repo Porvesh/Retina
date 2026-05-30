@@ -8,7 +8,7 @@
 #include <cstdio>
 #include <vector>
 
-#include "retina/channel.hpp"
+#include "retina/net/channel.hpp"
 
 using namespace retina;
 

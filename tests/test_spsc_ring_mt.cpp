@@ -24,7 +24,7 @@
 #include <thread>
 #include <vector>
 
-#include "retina/spsc_ring.hpp"
+#include "retina/buffers/spsc_ring.hpp"
 #include "mt_env.hpp"
 
 using namespace retina;

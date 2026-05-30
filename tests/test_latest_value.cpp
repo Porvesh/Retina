@@ -13,7 +13,7 @@
 #include <cstdio>
 #include <vector>
 
-#include "retina/latest_value.hpp"
+#include "retina/buffers/latest_value.hpp"
 
 using namespace retina;
 

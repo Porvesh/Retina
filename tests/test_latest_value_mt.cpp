@@ -25,7 +25,7 @@
 #include <thread>
 #include <vector>
 
-#include "retina/latest_value.hpp"
+#include "retina/buffers/latest_value.hpp"
 #include "mt_env.hpp"
 
 using namespace retina;

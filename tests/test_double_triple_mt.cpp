@@ -18,8 +18,8 @@
 #include <thread>
 #include <vector>
 
-#include "retina/double_buffer.hpp"
-#include "retina/triple_buffer.hpp"
+#include "retina/buffers/double_buffer.hpp"
+#include "retina/buffers/triple_buffer.hpp"
 #include "mt_env.hpp"
 
 using namespace retina;

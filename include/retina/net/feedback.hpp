@@ -4,7 +4,7 @@
 #include <random>
 #include <vector>
 
-#include "retina/decoder.hpp"
+#include "retina/net/decoder.hpp"
 
 namespace retina {
 

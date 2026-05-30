@@ -5,7 +5,7 @@
 #include <optional>
 #include <vector>
 
-#include "retina/frame.hpp"
+#include "retina/core/frame.hpp"
 
 namespace retina {
 

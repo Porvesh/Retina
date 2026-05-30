@@ -10,8 +10,8 @@
 #include <stdexcept>
 #include <vector>
 
-#include "retina/double_buffer.hpp"
-#include "retina/triple_buffer.hpp"
+#include "retina/buffers/double_buffer.hpp"
+#include "retina/buffers/triple_buffer.hpp"
 
 using namespace retina;
 

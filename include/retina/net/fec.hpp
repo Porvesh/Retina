@@ -4,7 +4,7 @@
 #include <map>
 #include <vector>
 
-#include "retina/packet.hpp"
+#include "retina/net/packet.hpp"
 
 namespace retina {
 

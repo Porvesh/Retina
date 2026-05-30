@@ -8,7 +8,7 @@
 #include <cstdio>
 #include <vector>
 
-#include "retina/camsim.hpp"
+#include "retina/sim/camsim.hpp"
 
 using namespace retina;
 
