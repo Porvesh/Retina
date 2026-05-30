@@ -2,6 +2,10 @@
 build/
 build-*/
 
+# Demo output (m4_compositor writes PPM frame sequences here)
+m4_frames/
+*.ppm
+
 # Editor / OS
 .DS_Store
 .vscode/

@@ -24,6 +24,9 @@ target_link_libraries(m0_spine PRIVATE retina_core Threads::Threads)
 add_executable(m3_link apps/m3_link.cpp)
 target_link_libraries(m3_link PRIVATE retina_core)
 
+add_executable(m4_compositor apps/m4_compositor.cpp)
+target_link_libraries(m4_compositor PRIVATE retina_core)
+
 # --- tests ---
 enable_testing()
 
@@ -96,6 +99,10 @@ add_test(NAME feedback COMMAND test_feedback)
 add_executable(test_double_triple_mt tests/test_double_triple_mt.cpp)
 target_link_libraries(test_double_triple_mt PRIVATE retina_core Threads::Threads)
 add_test(NAME double_triple_mt COMMAND test_double_triple_mt)
+
+add_executable(test_canvas tests/test_canvas.cpp)
+target_link_libraries(test_canvas PRIVATE retina_core)
+add_test(NAME canvas COMMAND test_canvas)
 
 if(RETINA_TSAN)
     target_compile_options(test_spsc_ring_mt      PRIVATE -fsanitize=thread -g -O1)
