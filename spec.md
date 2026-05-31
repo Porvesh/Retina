@@ -12,17 +12,15 @@ drop-policy tradeoffs, multi-stream time alignment, a lossy network with error
 correction, a live compositor, and that compositor run as a hard-real-time
 thread under deadline discipline.
 
-It is the successor to *Axon*: where Axon proved concurrency **correctness**,
 Retina is about **end-to-end latency and real-time determinism** — and about
 *measuring* every layer, not just building it.
 
 The whole system is a **deterministic, in-process simulation**: seeded RNG, no
 wall clock inside the library, no real sockets, no GPU. That is a deliberate
 choice — it makes every result (including the concurrency and the injected
-faults) reproducible run-to-run and unit-testable, which is the point of a
-learning/portfolio project. Where the real world would add a driver, a socket,
-or a GPU, Retina models the *concept* behind a clean interface that a real
-backend could later slot into.
+faults) reproducible run-to-run and unit-testable. Where the real world would
+add a driver, a socket, or a GPU, Retina models the *concept* behind a clean
+interface that a real backend could later slot into.
 
 ---
 
@@ -183,50 +181,47 @@ emitted frames show a **seq gap** — exactly how a consumer detects capture los
 
 ## 6. Milestones (build order + "done when")
 
-Each milestone is independently demonstrable. **All are complete** except the
-noted deferrals.
+Each milestone is independently demonstrable.
 
-### M0 — Spine ✅
+### M0 — Spine
 `camsim` + `LatestValue` + a consumer that prints inter-frame latency.
-**Done:** frames flow; a 10% drop is visible; the consumer skips stale frames;
-the producer's worst `publish()` stays in the microseconds (never blocks).
+Frames flow; a 10% drop is visible; the consumer skips stale frames; the
+producer's worst `publish()` stays in the microseconds (never blocks).
 Demo: `m0_spine`.
 
-### M1 — Buffer family + drop-policy probe ✅ *(plot deferred)*
+### M1 — Buffer family + drop-policy probe
 `SpscRing` + `DoubleBuf`/`TripleBuf` behind the same interface, compared.
-Freshness vs completeness is captured by the two verbs and pinned by tests; the
-formal *latency-vs-completeness plot* is deferred.
+Freshness vs completeness is captured by the two verbs and pinned by tests.
 
-### M2 — Multi-stream time alignment ✅ *(plots deferred)*
+### M2 — Multi-stream time alignment
 N cams with independent `drift_ppm`. `StreamAligner` picks stream 0 as reference,
 matches each other stream's nearest neighbour within an ε-guard (one-to-one),
 emits aligned tuples (with skew) or rejects desynced sets, and detects dropped
 triggers via seq gaps. Robust to a dead/lagging stream via a **max-wait horizon**
-(rejects at bounded latency instead of stalling) + an old-frame prune. The
-sync-error histogram / rejection-vs-drift plots are deferred.
+(rejects at bounded latency instead of stalling) + an old-frame prune.
 
-### M3 — Lossy link + jitter buffer + FEC ✅
+### M3 — Lossy link + jitter buffer + FEC
 An **in-process** lossy channel (drop / latency / jitter / bandwidth cap, seeded)
 — the deterministic stand-in for a real UDP socket, behind a `send`/`deliver`
 shim a socket backend could replace. RTP-style fragmentation + reassembly;
 frame-type–aware encoding (I/P, backward deps only) so **loss is asymmetric** — a
 lost P glitches one frame, a lost I orphans a whole GOP; an adaptive jitter
-buffer (RFC 3550-style estimate); **XOR FEC** that protects I-frames harder
-(Reed-Solomon deferred); and a **keyframe-request feedback loop** (PLI-style — the
-real-time-correct recovery, not per-packet retransmit).
-**Done:** `m3_link` prints a glass-to-glass latency distribution, an FEC
+buffer (RFC 3550-style estimate); **XOR FEC** that protects I-frames harder; and
+a **keyframe-request feedback loop** (PLI-style — the real-time-correct recovery,
+not per-packet retransmit).
+`m3_link` prints a glass-to-glass latency distribution, an FEC
 recovery-vs-overhead curve, and a jitter-buffer latency-vs-stutter tradeoff.
 
-### M4 — Compositor + HUD ✅ *(headless, no GPU)*
-No GPU available, so the compositor blends streams into a **CPU RGB framebuffer**
-and writes each composed frame to disk as a `.ppm` (which stitches into a
-video/gif) — the concept of GPU compositing minus the driver. Aligns the streams
-by timestamp (reusing M2), lays out a primary view + thumbnails, and overlays a
+### M4 — Compositor + HUD
+The compositor blends streams into a **CPU RGB framebuffer** and writes each
+composed frame to disk as a `.ppm` (which stitches into a video/gif) — the
+concept of GPU compositing behind a clean interface. Aligns the streams by
+timestamp (reusing M2), lays out a primary view + thumbnails, and overlays a
 HUD fed by real pipeline numbers.
-**Done:** `m4_compositor` writes a `.ppm` frame sequence of composited, aligned
-streams + a live HUD. *(A real GPU/window backend is the natural extension.)*
+`m4_compositor` writes a `.ppm` frame sequence of composited, aligned streams +
+a live HUD.
 
-### M5 — Hard-RT video thread ✅ *(RT numbers need Linux)*
+### M5 — Hard-RT video thread
 A live video pipeline's hot loop must emit a frame *every frame-period* or the
 stream stutters — the same deadline discipline a machine-control loop needs. M5
 takes M4's compositor and runs it as a **periodic hard-real-time task** at a
@@ -235,14 +230,12 @@ fixed cadence (60 fps): the render thread applies the three RT levers —
 tick with **zero hot-path allocation** (the `Canvas` is allocated once and
 reused). A `JitterMeter` records how far each frame slips from its deadline as a
 histogram. The RT levers are guarded under `#ifdef __linux__` and no-op
-elsewhere. This reuses M3-A's I/P concepts only loosely; its real point is the
-*scheduling* discipline, and it shares the RT primitives (`rt/`) any control-grade
-consumer would need.
-**Done (logic):** `m5_rt_video` reports the RT capabilities available on the
-platform and the per-frame deadline-jitter histogram. **Deferred:** the
-*tightened* jitter numbers, which require a Linux VM (`PREEMPT_RT` / `isolcpus`) —
-a Mac can only run it best-effort, so its histogram shows the OS preempting the
-render thread (exactly the tail M5 exists to squeeze out on Linux).
+elsewhere; its point is the *scheduling* discipline, and it shares the RT
+primitives (`rt/`) any control-grade consumer would need.
+`m5_rt_video` reports the RT capabilities available on the platform and the
+per-frame deadline-jitter histogram. The tightest jitter numbers come from a
+Linux host with `PREEMPT_RT` / `isolcpus`; elsewhere the same code runs
+best-effort and the histogram shows the OS preempting the render thread.
 
 ---
 
@@ -257,18 +250,16 @@ Each milestone ships a runnable under `apps/`:
 - `m5_rt_video` — RT-capability report + per-frame deadline-jitter histogram for
   the compositor run as a periodic hard-RT task.
 
-The original aspiration was a *single unified live window* showing all streams +
-a HUD of every stage's metrics. Retina realizes that as the headless
-`m4_compositor` output plus the per-milestone metric dumps; a unified live GPU
-window is future work gated on hardware.
+The `m4_compositor` `.ppm` output plus the per-milestone metric dumps give the
+full picture: every stream, aligned, with a HUD of each stage's numbers. A
+unified live GPU window is a natural extension (see §9).
 
 ---
 
 ## 8. Platform & tech notes
 
 - **Language:** header-only **C++20** throughout (`std::atomic`, `pthread` for RT
-  on Linux). The original spec floated mixing Rust for some parts; the
-  implementation is single-language for cohesion.
+  on Linux) — single-language for cohesion.
 - **Determinism over realism:** in-process channel instead of real UDP sockets;
   CPU `.ppm` compositing instead of a GPU window. Both hide behind interfaces a
   real backend could replace, and both keep the project reproducible/testable.
@@ -281,4 +272,4 @@ window is future work gated on hardware.
 
 Seqlock buffer · Reed-Solomon FEC (multi-loss) · RTCP-style bitrate backoff ·
 real localhost UDP backend behind the channel shim · a GPU/window compositor
-backend · the deferred M1/M2 plots · the tightened M5 jitter run on a Linux VM.
+backend · the M1/M2 metric plots · a tightened M5 jitter run on a Linux host.

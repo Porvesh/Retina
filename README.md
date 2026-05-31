@@ -13,10 +13,8 @@ that pipeline run as a hard-real-time thread under deadline discipline.
 
 Everything is a **deterministic simulation** (seeded, no wall clock in the
 library), so every result reproduces run to run and is unit-testable — including
-the concurrency, which is checked under ThreadSanitizer.
-
-> Successor to *Axon* (which proved concurrency correctness); Retina aims to prove
-> **end-to-end latency and real-time determinism**.
+the concurrency, which is checked under ThreadSanitizer. The focus is
+**end-to-end latency and real-time determinism**.
 
 ---
 
