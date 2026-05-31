@@ -45,9 +45,11 @@ public:
         s.frame.data = s.storage.data();
 
         // Publish: swap our just-written buffer into ready_ (marked fresh) and
-        // take whatever was there as our next in-progress buffer. release makes
-        // the bytes visible to the consumer's acquire on ready_.
-        const unsigned old = ready_.exchange(inprogress_ | kFresh, std::memory_order_release);
+        // take whatever was there as our next in-progress buffer. acq_rel: the
+        // release makes our bytes visible to the consumer's acquire on ready_;
+        // the acquire pairs with the consumer's release of the buffer we are
+        // reclaiming, so its reads of that slot are done before we overwrite it.
+        const unsigned old = ready_.exchange(inprogress_ | kFresh, std::memory_order_acq_rel);
         inprogress_ = old & kIndex;
     }
 
