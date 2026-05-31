@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# A newer push to the same ref cancels an in-flight run.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    name: build & test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure
+        run: cmake -S . -B build
+
+      - name: Build
+        run: cmake --build build -j
+
+      - name: Test
+        run: ctest --test-dir build --output-on-failure
+
+  tsan:
+    name: ThreadSanitizer
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure (TSan)
+        run: cmake -S . -B build-tsan -DRETINA_TSAN=ON
+
+      - name: Build (TSan)
+        run: cmake --build build-tsan -j
+
+      # Stress tests are env-sized so CI stays quick (see README).
+      - name: Test (TSan)
+        run: ctest --test-dir build-tsan --output-on-failure
+        env:
+          RETINA_MT_FRAMES: 20000
