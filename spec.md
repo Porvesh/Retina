@@ -16,11 +16,13 @@ Retina is about **end-to-end latency and real-time determinism** — and about
 *measuring* every layer, not just building it.
 
 The whole system is a **deterministic, in-process simulation**: seeded RNG, no
-wall clock inside the library, no real sockets, no GPU. That is a deliberate
-choice — it makes every result (including the concurrency and the injected
-faults) reproducible run-to-run and unit-testable. Where the real world would
-add a driver, a socket, or a GPU, Retina models the *concept* behind a clean
-interface that a real backend could later slot into.
+wall clock inside the library, no real sockets, and no GPU on the default path.
+That is a deliberate choice — it makes every result (including the concurrency
+and the injected faults) reproducible run-to-run and unit-testable. Where the
+real world would add a driver, a socket, or a GPU, Retina models the *concept*
+behind a clean interface that a real backend can slot into — as the compositor's
+experimental CUDA backend (`GpuCanvas`) now does, blending on the GPU behind the
+same `Canvas` API and reproducing the CPU output byte-for-byte.
 
 ---
 
@@ -251,8 +253,10 @@ Each milestone ships a runnable under `apps/`:
   the compositor run as a periodic hard-RT task.
 
 The `m4_compositor` `.ppm` output plus the per-milestone metric dumps give the
-full picture: every stream, aligned, with a HUD of each stage's numbers. A
-unified live GPU window is a natural extension (see §9).
+full picture: every stream, aligned, with a HUD of each stage's numbers. A GPU
+compositor backend (`GpuCanvas`, CUDA) now exists behind the same interface and
+reproduces the CPU frames byte-for-byte (`m4_gpu`); a unified live GPU *window*
+on top of it is the remaining extension (see §9).
 
 ---
 
@@ -261,8 +265,9 @@ unified live GPU window is a natural extension (see §9).
 - **Language:** header-only **C++20** throughout (`std::atomic`, `pthread` for RT
   on Linux) — single-language for cohesion.
 - **Determinism over realism:** in-process channel instead of real UDP sockets;
-  CPU `.ppm` compositing instead of a GPU window. Both hide behind interfaces a
-  real backend could replace, and both keep the project reproducible/testable.
+  CPU `.ppm` compositing by default (an optional CUDA `GpuCanvas` backend blends
+  the same frames on the GPU, byte-identical). Both hide behind interfaces a real
+  backend can replace, and the default path stays reproducible/testable.
 - **Linux for RT (M5):** `SCHED_FIFO` / `isolcpus` / `mlockall` are Linux-only and
   guarded under `#ifdef __linux__`; a Lima/Multipass VM suffices for everything
   except the very tightest jitter numbers (a VM adds its own jitter — note it,
@@ -271,5 +276,6 @@ unified live GPU window is a natural extension (see §9).
 ## 9. Possible extensions
 
 Seqlock buffer · Reed-Solomon FEC (multi-loss) · RTCP-style bitrate backoff ·
-real localhost UDP backend behind the channel shim · a GPU/window compositor
-backend · the M1/M2 metric plots · a tightened M5 jitter run on a Linux host.
+real localhost UDP backend behind the channel shim · a live GPU *window* on the
+CUDA compositor backend · the M1/M2 metric plots · a tightened M5 jitter run on a
+Linux host.
