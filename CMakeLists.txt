@@ -30,6 +30,28 @@ target_link_libraries(m4_compositor PRIVATE retina_core)
 add_executable(m5_rt_video apps/m5_rt_video.cpp)
 target_link_libraries(m5_rt_video PRIVATE retina_core Threads::Threads)
 
+# --- optional GPU compositor backend (M4 on the GPU) ---
+# Only built where CUDA is available; the CPU path is unaffected elsewhere.
+include(CheckLanguage)
+check_language(CUDA)
+if(CMAKE_CUDA_COMPILER)
+    enable_language(CUDA)
+    set(CMAKE_CUDA_STANDARD 17)   # CUDA 12.2 + CMake 3.22 has no CUDA20 dialect;
+    set(CMAKE_CUDA_STANDARD_REQUIRED ON)   # the .cu needs no C++20 (C++ side still is)
+    if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
+        set(CMAKE_CUDA_ARCHITECTURES 90)   # H100 = sm_90
+    endif()
+
+    add_library(retina_gpu STATIC src/gpu_canvas.cu)
+    target_link_libraries(retina_gpu PUBLIC retina_core)
+
+    add_executable(m4_gpu apps/m4_gpu.cpp)
+    target_link_libraries(m4_gpu PRIVATE retina_core retina_gpu)
+    message(STATUS "retina: CUDA found -> building GPU compositor (m4_gpu, sm_${CMAKE_CUDA_ARCHITECTURES})")
+else()
+    message(STATUS "retina: no CUDA compiler -> skipping GPU compositor (CPU path only)")
+endif()
+
 # --- tests ---
 enable_testing()
 

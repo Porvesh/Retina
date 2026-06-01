@@ -1,6 +1,7 @@
 # Build output
 build/
 build-*/
+build_gpu/
 
 # Demo output (m4_compositor writes PPM frame sequences here)
 m4_frames/
