@@ -102,22 +102,6 @@ The multithreaded stress tests are sized via env vars (`RETINA_MT_FRAMES`,
   thread and reports the RT capabilities available on the platform plus a
   per-frame deadline-jitter histogram (the thing you tighten on Linux).
 
-## Design notes
-
-- **Lock-free, never-blocking producer.** The buffer hub publishes with a single
-  atomic swap; consumers borrow slots via a refcount (RAII `FrameHandle`). Two
-  drop policies behind one interface: `latest()` (drop stale) and `next()` (FIFO).
-- **Deterministic simulation.** Seeded `mt19937_64`, simulated timestamps, no
-  wall clock in the library → reproducible faults and metrics; concurrency
-  verified under TSan and proven allocation-free on the hot path.
-- **Frame-type–aware networking (M3).** Packets model I/P dependencies, so loss
-  is asymmetric: a lost P glitches one frame, a lost I orphans a whole GOP —
-  which is why FEC protects I-frames harder and the receiver requests a keyframe.
-- **RT discipline (M5).** The compositor runs as a periodic hard-real-time task:
-  `SCHED_FIFO` + CPU pinning + `mlockall` on the render thread, the `Canvas`
-  allocated once and reused so the hot path never touches the heap, and a
-  `JitterMeter` histogram of how far each frame slips from its deadline.
-
 ## License
 
 [MIT](LICENSE)
