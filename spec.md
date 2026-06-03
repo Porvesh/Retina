@@ -67,10 +67,10 @@ These are the through-lines every component obeys:
 ┌────────┐    ┌───────────────┐   ┌───────────────┐   ┌────────────────┐
 │ align  │    │      net      │   │  compositor   │   │   RT video     │
 │ (align/)│   │    (net/)     │   │    (viz/)     │   │    (rt/)       │
-│ N cams  │   │ lossy channel │   │ CPU composite │   │ compositor as  │
-│ + drift │   │ + jitter buf  │   │ N streams +   │   │ a periodic     │
-│ ε-align │   │ + XOR FEC +   │   │ HUD → .ppm    │   │ hard-RT task;  │
-│         │   │ keyframe req  │   │ frames        │   │ deadline meter │
+│ N cams  │   │ lossy channel │   │ composite N   │   │ compositor as  │
+│ + drift │   │ + jitter buf  │   │ streams+HUD → │   │ a periodic     │
+│ ε-align │   │ + XOR FEC +   │   │ .ppm (CPU or  │   │ hard-RT task;  │
+│         │   │ keyframe req  │   │ CUDA GPU)     │   │ deadline meter │
 │  (M2)   │   │    (M3)       │   │    (M4)       │   │     (M5)       │
 └────────┘    └───────────────┘   └───────────────┘   └────────────────┘
 ```
