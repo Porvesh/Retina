@@ -47,6 +47,9 @@ if(CMAKE_CUDA_COMPILER)
 
     add_executable(m4_gpu apps/m4_gpu.cpp)
     target_link_libraries(m4_gpu PRIVATE retina_core retina_gpu)
+    # m4_gpu self-checks the GPU frames against the CPU reference (exit != 0 on
+    # any mismatch), so it doubles as the GPU backend's correctness test.
+    add_test(NAME m4_gpu COMMAND m4_gpu)
     message(STATUS "retina: CUDA found -> building GPU compositor (m4_gpu, sm_${CMAKE_CUDA_ARCHITECTURES})")
 else()
     message(STATUS "retina: no CUDA compiler -> skipping GPU compositor (CPU path only)")

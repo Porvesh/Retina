@@ -51,9 +51,10 @@ include/retina/
   sim/       CamSim — deterministic synthetic camera with fault injection
   align/     StreamAligner — M2 multi-stream time alignment
   net/       Encoder, Packetizer, LossyChannel, JitterBuffer, FEC, feedback (M3)
-  viz/       Canvas (CPU framebuffer) + 5x7 font — M4 headless compositor
+  viz/       Canvas (CPU framebuffer) + 5x7 font — M4 headless compositor;
+             GpuCanvas — optional CUDA twin (kernels in src/gpu_canvas.cu)
   rt/        rt::configure (SCHED_FIFO/affinity/mlockall) + JitterMeter (M5)
-apps/        m0_spine, m3_link, m4_compositor, m5_rt_video — runnable demos
+apps/        m0_spine, m3_link, m4_compositor, m4_gpu, m5_rt_video — runnable demos
 tests/       one dependency-free test per component (+ TSan stress tests)
 ```
 
@@ -87,6 +88,7 @@ The multithreaded stress tests are sized via env vars (`RETINA_MT_FRAMES`,
 ./build/m0_spine      # M0: CamSim(10% drop) -> LatestValue -> slow consumer
 ./build/m3_link       # M3: full lossy-network stack + metrics
 ./build/m4_compositor # M4: composite 3 aligned streams + HUD -> .ppm frames
+./build/m4_gpu        # M4 on the GPU (built only where CUDA is present)
 ./build/m5_rt_video   # M5: compositor as a periodic hard-RT task + jitter meter
 ```
 
@@ -98,6 +100,10 @@ The multithreaded stress tests are sized via env vars (`RETINA_MT_FRAMES`,
 - **`m4_compositor`** — composites three drifting streams (aligned by timestamp)
   plus a live HUD into `m4_frames/*.ppm`; stitch to a video with one `ffmpeg`
   command (printed on exit).
+- **`m4_gpu`** — runs the exact M4 scene through both the CPU `Canvas` and a
+  CUDA `GpuCanvas` (per-pixel blend/blit/glyph kernels) and checks the two
+  backends are byte-for-byte identical every frame. Built only where CUDA is
+  found; the CPU path is unaffected everywhere else.
 - **`m5_rt_video`** — runs the compositor as a fixed-cadence (60 fps) real-time
   thread and reports the RT capabilities available on the platform plus a
   per-frame deadline-jitter histogram (the thing you tighten on Linux).
